@@ -169,11 +169,7 @@ jobs:
         shell: bash
         run: |
           make
-      - name: Run tests
-        shell: bash
-        run: |
-          make quicktest
-        if: matrix.quicktest
+
 
       - name: Race test
         shell: bash
@@ -205,7 +201,7 @@ jobs:
           RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASS }}
         # working-directory: '$(modulePath)'
         # Deploy binaries if enabled in config && not a PR && not a fork
-        if: matrix.deploy && github.head_ref == '' && github.repository == 'rclone/rclone'
+        if: matrix.deploy 
 
   xgo:
     timeout-minutes: 60
