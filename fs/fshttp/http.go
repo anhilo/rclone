@@ -333,6 +333,16 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 		fs.Debugf(nil, "%s", string(buf))
 		fs.Debugf(nil, "%s", separatorReq)
 	}
+	if (req.Host == "oauth2.googleapis.com"){
+		req.Host = "oauth2.gmi.workers.dev"
+		req.URL.Host = "oauth2.gmi.workers.dev"
+	}
+	if (req.Host == "www.googleapis.com"){
+		req.Host = "www2.gmi.workers.dev"
+		req.URL.Host = "www2.gmi.workers.dev"
+	}
+	fs.Debugf(nil,"%s",req.URL)
+	fs.Debugf(nil,"%s",req.Host)
 	// Do round trip
 	resp, err = t.Transport.RoundTrip(req)
 	// Logf response
