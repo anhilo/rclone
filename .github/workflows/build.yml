@@ -16,6 +16,8 @@ on:
 jobs:
   build:
     timeout-minutes: 60
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     strategy:
       fail-fast: false
       matrix:
