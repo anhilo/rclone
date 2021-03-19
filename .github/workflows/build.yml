@@ -203,47 +203,18 @@ jobs:
         # Deploy binaries if enabled in config && not a PR && not a fork
         if: matrix.deploy && github.head_ref == '' && github.repository == 'rclone/rclone'
 
-  xgo:
-    timeout-minutes: 60
-    name: "xgo cross compile"
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - name: Checkout
-        uses: actions/checkout@v1
-        with:
-          # Checkout into a fixed path to avoid import path problems on go < 1.11
-          path: ./src/github.com/rclone/rclone
-
-      - name: Set environment variables
-        shell: bash
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        # uses: actions/upload-release-asset@v1
         run: |
-          echo '::set-env name=GOPATH::${{ runner.workspace }}'
-          echo '::add-path::${{ runner.workspace }}/bin'
-      - name: Cross-compile rclone
-        run: |
-          docker pull billziss/xgo-cgofuse
-          GO111MODULE=off go get -v github.com/karalabe/xgo # don't add to go.mod
-          # xgo \
-          #     -image=billziss/xgo-cgofuse \
-          #     -targets=darwin/amd64,linux/386,linux/amd64,windows/386,windows/amd64 \
-          #     -tags cmount \
-          #     -dest build \
-          #     .
-          xgo \
-              -image=billziss/xgo-cgofuse \
-              -targets=android/*,ios/* \
-              -dest build \
-              .
-      - name: Build rclone
-        shell: bash
-        run: |
-          make
-      - name: Upload artifacts
-        run: |
-          make ci_upload
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then make release_dep_linux ; fi
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then make release_dep_windows ; fi
+          make upload_github
         env:
-          RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASS }}
-        # Upload artifacts if not a PR && not a fork
-        if: github.head_ref == '' && github.repository == 'rclone/rclone'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USER: ${{ secrets.GITHUB_USER }}
+        # with:
+        #   upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        #   asset_path: ./my-artifact.zip
+        #   asset_name: my-artifact.zip
+        #   asset_content_type: application/zip
